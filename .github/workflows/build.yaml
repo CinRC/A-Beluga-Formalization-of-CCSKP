@@ -40,7 +40,9 @@ jobs:
     - name: Setup Beluga 🐳
       run: |
          opam install --yes beluga
-         eval $(opam env)
     - name: Compile Code ♺
       run: | 
+          whereis beluga
+          eval $(opam env)
+          whereis beluga
           beluga code/hellow_world.bel
