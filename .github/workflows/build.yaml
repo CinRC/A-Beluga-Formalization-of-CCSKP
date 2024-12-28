@@ -28,4 +28,4 @@ jobs:
         eval $(opam env)
     - name: Compile code
       run: | 
-          beluga code/hellow-world.bel
+          beluga code/hellow_world.bel
