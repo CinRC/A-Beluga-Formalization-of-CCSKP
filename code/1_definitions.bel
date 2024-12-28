@@ -1,0 +1,193 @@
+%%% CCSK^P %%%
+
+%%%%%%%%%%%%%%
+%%% SYNTAX %%%
+%%%%%%%%%%%%%%
+
+% Names
+LF names: type =
+;
+
+% Keys, implemented as natural numbers
+LF keys: type =
+  | z: keys
+  | s: keys → keys
+;
+
+% Labels
+LF labels: type =
+  | inp: names → labels
+  | out: names → labels
+  | tau: labels
+;
+
+% CCSK processes
+LF proc: type =
+  | zero: proc                            % 0
+  | pref: labels → proc → proc          % A.X
+  | kpref: labels → keys → proc → proc % A[N].X
+  | sum: proc → proc → proc             % X+Y
+  | par: proc → proc → proc             % X|Y
+  | nu: (names → proc) → proc           % (nu L) X
+%  | bang: proc → proc
+;
+
+% Context for restrictions
+schema ctx = names;
+
+% Equality of processes
+LF eqp: proc → proc → type =
+  | refp: eqp X X
+;
+
+%%% Order, equality and inequality relations for nats (keys)
+
+% N < M
+LF less: keys → keys → type =
+  | lzero: {N:keys} less z (s N)
+  | lsucc: less M N → less (s M) (s N)
+;
+
+% Equality of nats
+LF eq: keys → keys → type =
+  | ref: eq N N
+;
+
+% Inequality of nats
+LF neq: keys → keys → type =
+  | nless: less N M → neq N M
+  | ngreat: less M N → neq N M
+;
+
+%%%%%%%%%%%%%%%%%
+%%% SEMANTICS %%%
+%%%%%%%%%%%%%%%%%
+
+%%% LTS %%%
+
+% Proof keyed labels 
+LF pr_lab: type =
+  | pr_base: labels → keys → pr_lab
+  | pr_suml: pr_lab → pr_lab
+  | pr_sumr: pr_lab → pr_lab
+  | pr_parl: pr_lab → pr_lab
+  | pr_parr: pr_lab → pr_lab
+  | pr_sync: pr_lab → pr_lab → pr_lab
+;
+
+% Label of a proof label
+LF lab: pr_lab → labels → type =
+  | lab_base: lab (pr_base A N) A
+  | lab_suml: lab T A → lab (pr_suml T) A
+  | lab_sumr: lab T A → lab (pr_sumr T) A
+  | lab_parl: lab T A → lab (pr_parl T) A
+  | lab_parr: lab T A → lab (pr_parr T) A
+  | lab_sync: lab (pr_sync T1 T2) tau
+;
+
+% Key of a proof label
+LF key: pr_lab → keys → type =
+  | key_base: key (pr_base A N) N
+  | key_suml: key T N → key (pr_suml T) N
+  | key_sumr: key T N → key (pr_sumr T) N
+  | key_parl: key T N → key (pr_parl T) N
+  | key_parr: key T N → key (pr_parr T) N
+  | key_sync: key T1 N → key (pr_sync T1 T2) N
+%  | key_sync: key T1 N → key T2 N → key (pr_sync T1 T2) N
+;
+
+% Standard processes
+LF std: proc → type =
+  | std_zero: std zero
+  | std_pref: std X → std (pref A X)
+  | std_sum: std X → std Y → std (sum X Y)
+  | std_par: std X → std Y → std (par X Y)
+  | std_nu: ({y:names} std (X y)) → std (nu X)
+;
+
+% Predicate for non occurrence of keys in processes
+LF notin: keys → proc → type =
+  | not_zero: notin N zero
+  | not_pref: notin N X → notin N (pref A X)
+  | not_kpref: neq N M → notin N X → notin N (kpref A M X)
+  | not_sum: notin N X → notin N Y → notin N (sum X Y)
+  | not_par: notin N X → notin N Y → notin N (par X Y)
+  | not_nu: ({a:names} notin N (X a)) → notin N (nu X)
+;
+
+
+% Forward transitions
+LF fstep: proc → pr_lab → proc → type =
+  | fs_pref: std X → fstep (pref A X) (pr_base A N) (kpref A N X)
+  | fs_kpref: fstep X T X' → key T M → neq N M →
+    fstep (kpref A N X) T (kpref A N X')
+  | fs_suml: fstep X T X' → std Y → fstep (sum X Y) (pr_suml T) (sum X' Y)
+  | fs_sumr: fstep Y T Y' → std X → fstep (sum X Y) (pr_sumr T) (sum X Y')
+  | fs_parl: fstep X T X' → key T N → notin N Y →
+    fstep (par X Y) (pr_parl T) (par X' Y)
+  | fs_parr: fstep Y T Y' → key T N → notin N X →
+    fstep (par X Y) (pr_parr T) (par X Y')
+  | fs_synl: fstep X T1 X' → lab T1 (inp L) → key T1 N → fstep Y T2 Y' →
+    lab T2 (out L) → key T2 N → fstep (par X Y) (pr_sync T1 T2) (par X' Y')
+  | fs_synr: fstep X T1 X' → lab T1 (out L) → key T1 N → fstep Y T2 Y' →
+    lab T2 (inp L) → key T2 N → fstep (par X Y) (pr_sync T1 T2) (par X' Y')
+  | fs_nu: ({y:names} fstep (X y) T (X' y)) → fstep (nu X) T (nu X')
+;
+
+% Backward transitions
+LF bstep: proc → pr_lab → proc → type =
+  | bs_pref: std X → bstep (kpref A N X) (pr_base A N) (pref A X)
+  | bs_kpref: bstep X' T X → key T M → neq N M →
+    bstep (kpref A N X') T (kpref A N X)
+  | bs_suml: bstep X' T X → std Y → bstep (sum X' Y) (pr_suml T) (sum X Y)
+  | bs_sumr: bstep Y' T Y → std X → bstep (sum X Y') (pr_sumr T) (sum X Y)
+  | bs_parl: bstep X' T X → key T N → notin N Y →
+    bstep (par X' Y) (pr_parl T) (par X Y)
+  | bs_parr: bstep Y' T Y → key T N → notin N X →
+    bstep (par X Y') (pr_parr T) (par X Y)
+  | bs_synl: bstep X' T1 X → lab T1 (inp L) → key T1 N → bstep Y' T2 Y →
+    lab T2 (out L) → key T2 N → bstep (par X' Y') (pr_sync T1 T2) (par X Y)
+  | bs_synr: bstep X' T1 X → lab T1 (out L) → key T1 N → bstep Y' T2 Y →
+    lab T2 (inp L) → key T2 N → bstep (par X' Y') (pr_sync T1 T2) (par X Y)
+  | bs_nu: ({a:names} bstep (X' a) T (X a)) → bstep (nu X') T (nu X)
+;
+
+% Combined transitions
+LF step: proc → pr_lab → proc → type =
+  | fw: fstep X T X' → step X T X'
+  | bw: bstep X' T X → step X' T X
+;
+
+
+%%% Multistep transitions %%%
+
+% Multistep forward transitions
+LF fstep*: proc → proc → type =
+  | id_f*: fstep* X X
+  | st_f*: fstep X T Y → fstep* X Y
+  | tr_f*: fstep* X Y → fstep* Y Z → fstep* X Z
+;
+
+% Multistep backward transitions
+LF bstep*: proc → proc → type =
+  | id_b*: bstep* X X
+  | st_b*: bstep X T Y → bstep* X Y
+  | tr_b*: bstep* X Y → bstep* Y Z → bstep* X Z
+;
+
+% Multistep combined transitions
+LF step*: proc → proc → type =
+  | id_s*: step* X X
+  | st_s*: step X T Y → step* X Y
+  | tr_s*: step* X Y → step* Y Z → step* X Z
+;
+
+% Reachable processes
+LF reachable: proc → type =
+  | rch: std X → step* X Y → reachable Y
+;
+
+% Connected transitions
+LF conn_tr: step X T1 X' → step Y T2 Y' → type =
+  | c_t: {S1:step X T1 X'}{S2: step Y T2 Y'} step* X Y' → conn_tr S1 S2
+;
