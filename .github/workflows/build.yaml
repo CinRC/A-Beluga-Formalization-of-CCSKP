@@ -23,10 +23,10 @@ jobs:
       run: |
         sudo apt-get install opam
         opam init
-        yes | eval $(opam env --switch=default)
+        eval $(opam env --switch=default)
     - name: Setup Beluga 🐳
       run: |
-        opam install beluga
+        yes | opam install beluga
     - name: Compile code
       run: | 
           beluga code/hellow_world.bel
