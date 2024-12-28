@@ -43,7 +43,4 @@ jobs:
     - name: Compile Code ♺
       run: | 
           eval $(opam env)
-          pwd
-          cd ${{ github.workspace }}/code/
-          pwd
-          beluga hellow_world.bel
+          beluga hello_world.bel
