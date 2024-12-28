@@ -1,0 +1,10 @@
+% Types
+bool: type.
+true: bool.
+false: bool.
+nat: type.
+z: nat.
+succ: nat -> nat.
+list : nat -> type.
+nil : list z.
+cons : bool -> list N -> list (succ N).
