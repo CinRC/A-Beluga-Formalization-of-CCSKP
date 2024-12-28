@@ -16,10 +16,17 @@ on:
 # and click on "Run workflow" next to "This workflow has a workflow_dispatch event trigger."
 # to run the workflow manually, if need.d
 
-# This will 
+# This will allow a run to be stopped if another run is requested before it terminated.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# This is the series of action we want to do:
+# 1. on ubuntu-latest,
+# 2. checkout the current repository,
+# 3. Install Opam,
+# 4. Install Beluga
+# 5. Compile the code/hellow_world.bel file using beluga.
 
 jobs:
   build:
@@ -34,6 +41,6 @@ jobs:
       run: |
          opam install --yes beluga
          eval $(opam env)
-    - name: Compile code
+    - name: Compile Code ♺
       run: | 
           beluga code/hellow_world.bel
