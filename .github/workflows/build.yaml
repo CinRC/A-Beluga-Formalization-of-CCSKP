@@ -22,7 +22,7 @@ jobs:
     - name: Setup Beluga 🐳
       run: |
         sudo apt-get install opam
-        opam init --bare
+        opam init
         opam install beluga
         eval $(opam env)
     - name: Compile code
