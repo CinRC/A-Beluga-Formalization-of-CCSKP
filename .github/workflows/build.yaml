@@ -3,6 +3,7 @@
 
 name: Build
 
+# "Every time a push is made on the main branch, that changes one of the file in the code/ folder…"
 on:
   push:
     branches: [ main ]
@@ -10,6 +11,12 @@ on:
       - 'code/**'
   workflow_dispatch:
 
+# "workflow_dispatch" is here to allow the action to be triggered manually.
+# Go to https://github.com/CinRC/Beluga_implementation/actions/workflows/build.yaml
+# and click on "Run workflow" next to "This workflow has a workflow_dispatch event trigger."
+# to run the workflow manually, if need.d
+
+# This will 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -23,10 +30,10 @@ jobs:
       run: |
         sudo apt-get install opam
         opam init
-        eval $(opam env --switch=default)
     - name: Setup Beluga 🐳
       run: |
          opam install --yes beluga
+         eval $(opam env)
     - name: Compile code
       run: | 
           beluga code/hellow_world.bel
