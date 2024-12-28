@@ -42,7 +42,8 @@ jobs:
          opam install --yes beluga
     - name: Compile Code ♺
       run: | 
-          whereis beluga
           eval $(opam env)
-          whereis beluga
-          beluga code/hellow_world.bel
+          pwd
+          cd ${{ github.workspace }}/code/
+          pwd
+          beluga hellow_world.bel
