@@ -8,6 +8,7 @@ on:
     branches: [ main ]
     paths:
       - 'code/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
