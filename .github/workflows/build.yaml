@@ -43,4 +43,4 @@ jobs:
     - name: Compile Code ♺
       run: | 
           eval $(opam env)
-          beluga hello_world.bel
+          beluga code/hello_world.bel
