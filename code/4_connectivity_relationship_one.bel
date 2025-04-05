@@ -1,0 +1,291 @@
+%%% Proof of Theorem 2.1(i)
+
+% If two transitions between reachable processes are connected, then their two proof keyed labels are connected.
+rec conn_rel_one: (g:ctx) {S1:[g ⊢ step X T1 X']} {S2:[g ⊢ step Y T2 Y']} [g ⊢ reachable X] → [g ⊢ conn_tr S1 S2] → [g ⊢ conn T1 T2] =
+/ total d (conn_rel_one d _ _ _ _ _ _ _ _ _ _) /
+mlam S1,S2 ⇒ fn r,c ⇒ let [g ⊢ ct S1 S2 S*] = c in
+let [g ⊢ rch D S0*] = r in
+(case [g ⊢ D] of
+   | [g ⊢ std_null] ⇒ let [g ⊢ refp] = step*_from_null [g ⊢ S0*] in
+     (case [g ⊢ S1] of
+        | [g ⊢ fw F1] ⇒ impossible [g ⊢ F1]
+        | [g ⊢ bw B1] ⇒ impossible [g ⊢ B1])
+   | [g ⊢ std_pref D'] ⇒ let [g ⊢ E1] = step*_from_pref [g ⊢ S0*] in
+     let [g ⊢ E2] = step*_from_pref [g ⊢ tr_s* S0* S*] in (case [g ⊢ E1] of
+        | [g ⊢ or_pref] ⇒ (case [g ⊢ S1] of
+             | [g ⊢ fw (fs_pref _)] ⇒ [g ⊢ c_a1]
+             | [g ⊢ bw B1] ⇒ impossible [g ⊢ B1])
+        | [g ⊢ or_kpref] ⇒ (case [g ⊢ E2] of
+             | [g ⊢ or_pref] ⇒ (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ impossible [g ⊢ F2]
+                  | [g ⊢ bw (bs_pref _)] ⇒ [g ⊢ c_a2])
+             | [g ⊢ or_kpref] ⇒ let [g ⊢ S*'] = step*_betw_kprefs [g ⊢ S*] in
+               let [g ⊢ S0*'] = step*_betw_pref_and_kpref [g ⊢ S0*] in
+               (case [g ⊢ S1] of
+                  | [g ⊢ fw (fs_kpref F1 _ _)] ⇒ (case [g ⊢ S2] of
+                       | [g ⊢ fw (fs_pref _)] ⇒ [g ⊢ c_a2]
+                       | [g ⊢ fw (fs_kpref F2 _ _)] ⇒ conn_rel_one [g ⊢ fw F1] [g ⊢ fw F2] [g ⊢ rch D' S0*'] [g ⊢ ct (fw F1) (fw F2) S*']
+                       | [g ⊢ bw (bs_kpref B2 _ _)] ⇒ conn_rel_one [g ⊢ fw F1] [g ⊢ bw B2] [g ⊢ rch D' S0*'] [g ⊢ ct (fw F1) (bw B2) S*'])
+                  | [g ⊢ bw (bs_pref _)] ⇒ [g ⊢ c_a1]
+                  | [g ⊢ bw (bs_kpref B1' _ _)] ⇒ (case [g ⊢ S2] of
+                       | [g ⊢ fw (fs_pref _)] ⇒ [g ⊢ c_a2]
+                       | [g ⊢ fw (fs_kpref F2' _ _)] ⇒ conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D' S0*'] [g ⊢ ct (bw B1') (fw F2') S*']
+                       | [g ⊢ bw (bs_kpref B2' _ _)] ⇒ conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D' S0*'] [g ⊢ ct (bw B1') (bw B2') S*']))))
+   | [g ⊢ std_sum D1 D2] ⇒ let [g ⊢ sm] = step*_from_sum [g ⊢ S0*] in
+     let [g ⊢ sm] = step*_from_sum [g ⊢ tr_s* S0* S*] in
+     (case [g ⊢ S1] of
+        | [g ⊢ fw F1] ⇒ (case [g ⊢ F1] of
+             | [g ⊢ fs_suml F1' _] ⇒ let [g ⊢ S*'] = step*_betw_sums_left [g ⊢ S*] in
+               let [g ⊢ S0*'] = step*_betw_sums_left [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_suml F2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_c1l C]
+                       | [g ⊢ fs_sumr F2' _] ⇒ [g ⊢ c_c2l])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_suml B2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_c1l C]
+                       | [g ⊢ bs_sumr B2' _] ⇒ [g ⊢ c_c2l]))
+             | [g ⊢ fs_sumr F1' _] ⇒ let [g ⊢ S*'] = step*_betw_sums_right [g ⊢ S*] in
+                         let [g ⊢ S0*'] = step*_betw_sums_right [g ⊢ S0*] in
+                         (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_suml F2' _] ⇒ [g ⊢ c_c2r]
+                       | [g ⊢ fs_sumr F2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_c1r C])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_suml B2' _] ⇒ [g ⊢ c_c2r]
+                       | [g ⊢ bs_sumr B2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_c1r C])))
+        | [g ⊢ bw B1] ⇒ (case [g ⊢ B1] of
+             | [g ⊢ bs_suml B1' _] ⇒ let [g ⊢ S*'] = step*_betw_sums_left [g ⊢ S*] in
+                         let [g ⊢ S0*'] = step*_betw_sums_left [g ⊢ S0*] in
+                         (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_suml F2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_c1l C]
+                       | [g ⊢ fs_sumr F2' _] ⇒ [g ⊢ c_c2l])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_suml B2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_c1l C]
+                       | [g ⊢ bs_sumr B2' _] ⇒ [g ⊢ c_c2l]))
+             | [g ⊢ bs_sumr B1' _] ⇒ let [g ⊢ S*'] = step*_betw_sums_right [g ⊢ S*] in
+                         let [g ⊢ S0*'] = step*_betw_sums_right [g ⊢ S0*] in
+                         (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_suml F2' _] ⇒ [g ⊢ c_c2r]
+                       | [g ⊢ fs_sumr F2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_c1r C])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_suml B2' _] ⇒ [g ⊢ c_c2r]
+                       | [g ⊢ bs_sumr B2' _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_c1r C])))) 
+   | [g ⊢ std_par D1 D2] ⇒ let [g ⊢ pr] = step*_from_par [g ⊢ S0*] in
+     let [g ⊢ pr] = step*_from_par [g ⊢ tr_s* S0* S*] in
+     (case [g ⊢ S1] of
+        | [g ⊢ fw F1] ⇒ (case [g ⊢ F1] of
+             | [g ⊢ fs_parl F1' _ _] ⇒ let [g ⊢ S*'] = step*_betw_pars_left [g ⊢ S*] in
+               let [g ⊢ S0*'] = step*_betw_pars_left [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_p1l C]
+                       | [g ⊢ fs_parr F2' _ _] ⇒ [g ⊢ c_p2l]
+                       | [g ⊢ fs_synl F2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_s1l C]
+                       | [g ⊢ fs_synr F2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_s1l C])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_p1l C]
+                       | [g ⊢ bs_parr B2' _ _] ⇒ [g ⊢ c_p2l]
+                       | [g ⊢ bs_synl B2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_s1l C]
+                       | [g ⊢ bs_synr B2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_s1l C]))
+             | [g ⊢ fs_parr F1' _ _] ⇒ let [g ⊢ S*'] = step*_betw_pars_right [g ⊢ S*] in
+               let [g ⊢ S0*'] = step*_betw_pars_right [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒ [g ⊢ c_p2r]
+                       | [g ⊢ fs_parr F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_p1r C]
+                       | [g ⊢ fs_synl _ _ _ F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_s1r C]
+                       | [g ⊢ fs_synr _ _ _ F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (fw F2') S*'] in [g ⊢ c_s1r C])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒ [g ⊢ c_p2r]
+                       | [g ⊢ bs_parr B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_p1r C]
+                       | [g ⊢ bs_synl _ _ _ B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_s1r C]
+                       | [g ⊢ bs_synr _ _ _ B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw F1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (fw F1') (bw B2') S*'] in [g ⊢ c_s1r C]))
+             | [g ⊢ fs_synl FL1 _ _ FR1 _ _] ⇒ let [g ⊢ SL*] = step*_betw_pars_left [g ⊢ S*] in
+               let [g ⊢ S0L*] = step*_betw_pars_left [g ⊢ S0*] in
+               let [g ⊢ SR*] = step*_betw_pars_right [g ⊢ S*] in
+               let [g ⊢ S0R*] = step*_betw_pars_right [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FL1] [g ⊢ fw F2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (fw F2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ fs_parr F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FR1] [g ⊢ fw F2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (fw F2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ fs_synl FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ fs_synr FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FL1] [g ⊢ bw B2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (bw B2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ bs_parr B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FR1] [g ⊢ bw B2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (bw B2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ bs_synl BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ bs_synr BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]))
+             | [g ⊢ fs_synr FL1 _ _ FR1 _ _] ⇒ let [g ⊢ SL*] = step*_betw_pars_left [g ⊢ S*] in
+               let [g ⊢ S0L*] = step*_betw_pars_left [g ⊢ S0*] in
+               let [g ⊢ SR*] = step*_betw_pars_right [g ⊢ S*] in
+               let [g ⊢ S0R*] = step*_betw_pars_right [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FL1] [g ⊢ fw F2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (fw F2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ fs_parr F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FR1] [g ⊢ fw F2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (fw F2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ fs_synl FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ fs_synr FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FL1] [g ⊢ bw B2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (bw B2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ bs_parr B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ fw FR1] [g ⊢ bw B2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (bw B2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ bs_synl BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ bs_synr BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ fw FL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (fw FL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ fw FR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (fw FR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2])))
+        | [g ⊢ bw B1] ⇒ (case [g ⊢ B1] of
+             | [g ⊢ bs_parl B1' _ _] ⇒ let [g ⊢ S*'] = step*_betw_pars_left [g ⊢ S*] in
+               let [g ⊢ S0*'] = step*_betw_pars_left [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_p1l C]
+                       | [g ⊢ fs_parr F2' _ _] ⇒ [g ⊢ c_p2l]
+                       | [g ⊢ fs_synl F2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_s1l C]
+                       | [g ⊢ fs_synr F2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_s1l C])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_p1l C]
+                       | [g ⊢ bs_parr B2' _ _] ⇒ [g ⊢ c_p2l]
+                       | [g ⊢ bs_synl B2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_s1l C]
+                       | [g ⊢ bs_synr B2' _ _ _ _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D1 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_s1l C]))
+             | [g ⊢ bs_parr B1' _ _] ⇒ let [g ⊢ S*'] = step*_betw_pars_right [g ⊢ S*] in
+               let [g ⊢ S0*'] = step*_betw_pars_right [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒ [g ⊢ c_p2r]
+                       | [g ⊢ fs_parr F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_p1r C]
+                       | [g ⊢ fs_synl _ _ _ F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_s1r C]
+                       | [g ⊢ fs_synr _ _ _ F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ fw F2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (fw F2') S*'] in [g ⊢ c_s1r C])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒ [g ⊢ c_p2r]
+                       | [g ⊢ bs_parr B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_p1r C]
+                       | [g ⊢ bs_synl _ _ _ B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_s1r C]
+                       | [g ⊢ bs_synr _ _ _ B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw B1'] [g ⊢ bw B2'] [g ⊢ rch D2 S0*'] [g ⊢ ct (bw B1') (bw B2') S*'] in [g ⊢ c_s1r C]))
+             | [g ⊢ bs_synl BL1 _ _ BR1 _ _] ⇒ let [g ⊢ SL*] = step*_betw_pars_left [g ⊢ S*] in
+               let [g ⊢ S0L*] = step*_betw_pars_left [g ⊢ S0*] in
+               let [g ⊢ SR*] = step*_betw_pars_right [g ⊢ S*] in
+               let [g ⊢ S0R*] = step*_betw_pars_right [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BL1] [g ⊢ fw F2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (fw F2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ fs_parr F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BR1] [g ⊢ fw F2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (fw F2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ fs_synl FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ fs_synr FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BL1] [g ⊢ bw B2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (bw B2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ bs_parr B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BR1] [g ⊢ bw B2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (bw B2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ bs_synl BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ bs_synr BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]))
+             | [g ⊢ bs_synr BL1 _ _ BR1 _ _] ⇒ let [g ⊢ SL*] = step*_betw_pars_left [g ⊢ S*] in
+               let [g ⊢ S0L*] = step*_betw_pars_left [g ⊢ S0*] in
+               let [g ⊢ SR*] = step*_betw_pars_right [g ⊢ S*] in
+               let [g ⊢ S0R*] = step*_betw_pars_right [g ⊢ S0*] in
+               (case [g ⊢ S2] of
+                  | [g ⊢ fw F2] ⇒ (case [g ⊢ F2] of
+                       | [g ⊢ fs_parl F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BL1] [g ⊢ fw F2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (fw F2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ fs_parr F2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BR1] [g ⊢ fw F2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (fw F2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ fs_synl FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ fs_synr FL2 _ _ FR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ fw FL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (fw FL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ fw FR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (fw FR2) SR*] in [g ⊢ c_s3 C1 C2])
+                  | [g ⊢ bw B2] ⇒ (case [g ⊢ B2] of
+                       | [g ⊢ bs_parl B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BL1] [g ⊢ bw B2'] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (bw B2') SL*] in [g ⊢ c_s2l C]
+                       | [g ⊢ bs_parr B2' _ _] ⇒
+                         let [g ⊢ C] = conn_rel_one [g ⊢ bw BR1] [g ⊢ bw B2'] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (bw B2') SR*] in [g ⊢ c_s2r C]
+                       | [g ⊢ bs_synl BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]
+                       | [g ⊢ bs_synr BL2 _ _ BR2 _ _] ⇒
+                         let [g ⊢ C1] = conn_rel_one [g ⊢ bw BL1] [g ⊢ bw BL2] [g ⊢ rch D1 S0L*] [g ⊢ ct (bw BL1) (bw BL2) SL*] in
+                         let [g ⊢ C2] = conn_rel_one [g ⊢ bw BR1] [g ⊢ bw BR2] [g ⊢ rch D2 S0R*] [g ⊢ ct (bw BR1) (bw BR2) SR*] in [g ⊢ c_s3 C1 C2]))))
+   | [g ⊢ std_nu \a.D'] ⇒ let [g ⊢ rs] = step*_from_nu [g ⊢ S0*] in
+     let [g ⊢ rs] = step*_from_nu [g ⊢ tr_s* S0* S*] in
+     let [g,a:names ⊢ S*'] = step*_betw_nus [g ⊢ S*] in
+     let [g,a:names ⊢ S0*'] = step*_betw_nus [g ⊢ S0*] in
+     (case [g ⊢ S1] of
+        | [g ⊢ fw (fs_nu \a.F1)] ⇒ (case [g ⊢ S2] of
+             | [g ⊢ fw (fs_nu \a.F2)] ⇒
+               let [g,a:names ⊢ C] = conn_rel_one [g,a:names ⊢ fw F1] [g,a:names ⊢ fw F2] [g,a:names ⊢ rch D' S0*'] [g,a:names ⊢ ct (fw F1) (fw F2) S*'] in
+               let ex_conn [g,a:names ⊢ C] [g ⊢ C'] = strengthen_conn [g,a:names ⊢ C] in [g ⊢ C'] 
+             | [g ⊢ bw (bs_nu \a.B2)] ⇒
+               let [g,a:names ⊢ C] = conn_rel_one [g,a:names ⊢ fw F1] [g,a:names ⊢ bw B2] [g,a:names ⊢ rch D' S0*'] [g,a:names ⊢ ct (fw F1) (bw B2) S*'] in
+               let ex_conn [g,a:names ⊢ C] [g ⊢ C'] = strengthen_conn [g,a:names ⊢ C] in [g ⊢ C'])
+        | [g ⊢ bw (bs_nu \a.B1)] ⇒ (case [g ⊢ S2] of
+             | [g ⊢ fw (fs_nu \a.F2)] ⇒
+               let [g,a:names ⊢ C] = conn_rel_one [g,a:names ⊢ bw B1] [g,a:names ⊢ fw F2] [g,a:names ⊢ rch D' S0*'] [g,a:names ⊢ ct (bw B1) (fw F2) S*'] in
+               let ex_conn [g,a:names ⊢ C] [g ⊢ C'] = strengthen_conn [g,a:names ⊢ C] in [g ⊢ C']
+             | [g ⊢ bw (bs_nu \a.B2)] ⇒
+               let [g,a:names ⊢ C] = conn_rel_one [g,a:names ⊢ bw B1] [g,a:names ⊢ bw B2] [g,a:names ⊢ rch D' S0*'] [g,a:names ⊢ ct (bw B1) (bw B2) S*'] in
+               let ex_conn [g,a:names ⊢ C] [g ⊢ C'] = strengthen_conn [g,a:names ⊢ C] in [g ⊢ C'])))
+;
