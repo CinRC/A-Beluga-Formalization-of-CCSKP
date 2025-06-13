@@ -1,4 +1,4 @@
-## Project Files Overview
+## Code Overview
 Below are the files included in this artifact:
 
 ```
@@ -11,11 +11,15 @@ all.cfg                                     - Collects all Beluga source files
 6_connectivity_relationship_two.bel         - Proof of Theorem 2.1(ii)
 7_complementarity.bel                       - Proof of Theorem 2.6 (complementarity of dependence and independence)
 ```
+Remarks:
+
+- Most of the results proved in the file `2_basic_properties.bel` are technical lemmas which are essential for the encoding, despite being taken for granted in the informal discussion of the system. For example, while it is clear that each proof keyed label has a unique key and label, this result needs to be explicitly proved in the Beluga formalization.
+- The main results in this work are Theorems 2.1 and 2.6. Although the paper states Lemmas 2.2 and 2.3 to prove the former, it is further explained that the two lemmas are not required in the encoding. For this reason, their encoding is not present in this artifact.
 
 ## Paper-to-Artifact Table
 The following table pairs up definitions and proofs from the paper with those from the Beluga code.
 
-| Definition/Proofs                                        | Paper         | File                                | Definition Name                |
+| Definitions/Proofs                                       | Paper         | File                                | Name of the encoding           |
 |----------------------------------------------------------|---------------|-------------------------------------|--------------------------------|
 | Names, keys, labels, processes                           | Section 2.1   | 1_definitions.bel                   | names, keys, labels, proc      |
 | Standard processes                                       | Section 2.1   | 1_definitions.bel                   | std                            |
