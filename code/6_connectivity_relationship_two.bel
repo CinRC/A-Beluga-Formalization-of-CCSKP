@@ -202,7 +202,7 @@ LF ex_conn_fstep: pr_lab → pr_lab → type =
   | ex_cf: fstep X1 T1 X1' → fstep X2' T2 X2 → step* X1 X2' → reachable X1 → ex_conn_fstep T1 T2
 ;
 
-% We prove a stronger version of the second part of Theorem 2.1(ii):
+% We prove a stronger version of Theorem 2.1(ii):
 % If two valid proof labels are connected, then there are forward transitions
 % indexed by such proof keyed labels and connected by a path; moreover,
 % the processes involved in such transitions are reachable.
@@ -580,14 +580,14 @@ fn v1,v2,c ⇒ case c of
                              [g ⊢ ex_cf (fs_synr FL1 LL1 HL1 FR1 LR1 HR1) (fs_synr FL2 LL2 HL2 FR2 LR2 HR2) (tr_s* (st_s* (bw (bs_parr BR3 HR3 NR3))) (st_s* (bw (bs_parl BL3 HL3 NL3)))) (rch (std_par DL DR) (tr_s* (st_s* (fw (fs_parl FL3 HL3 NL3))) (st_s* (fw (fs_parr FR3 HR3 NR3)))))])))))
 ;
 
-% We finally prove the second part of Theorem 2.1(ii) as a corollary of the previous theorem.
+% We finally prove Theorem 2.1(ii) as a corollary of the previous theorem.
 
 % Type family encoding the existence of two connected transitions involving reachable processes
 LF ex_conn_tr: pr_lab → pr_lab → type =
   | ex_c: {S1: step X T1 X'} {S2: step Y T2 Y'} reachable X → conn_tr S1 S2 → ex_conn_tr T1 T2
 ;
 
-% Proof of Theorem 2.1(ii) - second part:
+% Proof of Theorem 2.1(ii):
 % If two good proof labels are connected, then there are connected transitions with such labels.
 rec conn_rel_two: (g:ctx) [g ⊢ valid T1] → [g ⊢ valid T2] → [g ⊢ conn T1 T2] → [g ⊢ ex_conn_tr T1 T2] =
 / total c (conn_rel_two _ _ _ _ _ c) /

@@ -9,8 +9,8 @@ LF realised: pr_lab → type =
 
 % Lemma 2.5: every valid proof label is realised
 rec pr_lab_is_realised: (g:ctx) [g ⊢ valid T] → [g ⊢ realised T] =
-/ total g (pr_lab_is_realised _ _ g) /
-fn d ⇒ case d of
+/ total v (pr_lab_is_realised _ _ v) /
+fn v ⇒ case v of
   | [g ⊢ v_base] ⇒ [g ⊢ rl (std_pref std_null) (fs_pref std_null)]
   | [g ⊢ v_suml V] ⇒ let [g ⊢ rl D F] = pr_lab_is_realised [g ⊢ V] in [g ⊢ rl (std_sum D std_null) (fs_suml F std_null)]
   | [g ⊢ v_sumr V] ⇒ let [g ⊢ rl D F] = pr_lab_is_realised [g ⊢ V] in [g ⊢ rl (std_sum std_null D) (fs_sumr F std_null)]

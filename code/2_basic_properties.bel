@@ -9,7 +9,7 @@ LF eq_or_neq: keys → keys → type =
 
 % Given two keys, they are either equal or not equal
 rec compare: {g:ctx} {K:[⊢ keys]} {M:[⊢ keys]} [g ⊢ eq_or_neq K[] M[]] =
-/ total n (compare _ n _) /
+/ total k (compare _ k _) /
 mlam g,K,M ⇒ case [⊢ K] of
   | [⊢ z] ⇒ (case [⊢ M] of
      | [⊢ z] ⇒ [_ ⊢ c_eq]
@@ -34,16 +34,16 @@ fn l ⇒ let [g ⊢ lsucc L] = l in irreflexive_less [g ⊢ L]
 
 % Proof that inequality of keys is irreflexive (K != K is absurd)
 rec irreflexive_neq: (g:ctx) [g ⊢ neq K[] K[]] → [g ⊢ false] =
-/ total d (irreflexive_neq _ _ d) /
-fn d ⇒ case d of
+/ total i (irreflexive_neq _ _ i) /
+fn i ⇒ case i of
   | [g ⊢ nless L] ⇒ irreflexive_less [g ⊢ L]
   | [g ⊢ ngreat L] ⇒ irreflexive_less [g ⊢ L]
 ;
 
 % Proof that inequality of keys is symmetric
 rec symmetric_neq: (g:ctx) [g ⊢ neq K[] M[]] → [g ⊢ neq M[] K[]] =
-/ total d (symmetric_neq _ _ _ d) /
-fn d ⇒ case d of
+/ total i (symmetric_neq _ _ _ i) /
+fn i ⇒ case i of
   | [g ⊢ nless L] ⇒ [g ⊢ ngreat L]
   | [g ⊢ ngreat L] ⇒ [g ⊢ nless L]
 ;
@@ -55,7 +55,7 @@ LF ex_neq: keys → type =
 
 % For all keys K there exists a key M with M != K
 rec existence_of_different_key: {g:ctx} {K:[⊢ keys]} [g ⊢ ex_neq K[]] =
-/ total n (existence_of_different_key _ n) /
+/ total k (existence_of_different_key _ k) /
 mlam g,K ⇒ case [⊢ K] of
   | [⊢ z] ⇒ [g ⊢ ex_n (ngreat (lzero (s z)))]
   | [⊢ s M] ⇒ (case existence_of_different_key [g] [⊢ M] of
@@ -129,8 +129,8 @@ fn h1,h2 ⇒ case h1 of
 
 % For all keys K, K does not occur in a standard process
 rec no_key_in_std: (g:ctx) {K:[⊢ keys]} [g ⊢ std X] → [g ⊢ notin K[] X] =
-/ total n (no_key_in_std _ _ _ n) /
-mlam K ⇒ fn n ⇒ case n of
+/ total d (no_key_in_std _ _ _ d) /
+mlam K ⇒ fn d ⇒ case d of
   | [g ⊢ std_null] ⇒ [g ⊢ not_null]
   | [g ⊢ std_pref D] ⇒ let [g ⊢ N] = no_key_in_std [⊢ K] [g ⊢ D] in [g ⊢ not_pref N]
   | [g ⊢ std_sum D1 D2] ⇒ let [g ⊢ N1] = no_key_in_std [⊢ K] [g ⊢ D1] in
@@ -160,7 +160,7 @@ mlam T,D ⇒ let [g ⊢ ex_k H] = existence_of_key [_ ⊢ T] in
 % Loop lemma - first implication
 rec loop_lemma_one: (g:ctx) [g ⊢ fstep X T X'] → [g ⊢ bstep X' T X] =
 / total f (loop_lemma_one _ _ _ _ f) /
-fn f ⇒  case f of
+fn f ⇒ case f of
   | [g ⊢ fs_pref D] ⇒ [g ⊢ bs_pref D]
   | [g ⊢ fs_kpref F H I] ⇒ let [g ⊢ B] = loop_lemma_one [g ⊢ F] in [g ⊢ bs_kpref B H I]
   | [g ⊢ fs_suml F D] ⇒ let [g ⊢ B] = loop_lemma_one [g ⊢ F] in [g ⊢ bs_suml B D]
@@ -177,7 +177,7 @@ fn f ⇒  case f of
 % Loop lemma - second implication
 rec loop_lemma_two: (g:ctx) [g ⊢ bstep X' T X] → [g ⊢ fstep X T X'] =
 / total b (loop_lemma_two _ _ _ _ b) /
-fn b ⇒  case b of
+fn b ⇒ case b of
   | [g ⊢ bs_pref D] ⇒ [g ⊢ fs_pref D]
   | [g ⊢ bs_kpref B H I] ⇒ let [g ⊢ F] = loop_lemma_two [g ⊢ B] in [g ⊢ fs_kpref F H I]
   | [g ⊢ bs_suml B D] ⇒ let [g ⊢ F] = loop_lemma_two [g ⊢ B] in [g ⊢ fs_suml F D]
