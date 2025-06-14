@@ -1,5 +1,5 @@
 # Overview
-This repository contains the source code for the paper "A Formalization of the Reversible Concurrent Calculus CCSK<sup>P</sup> in Beluga", accepted at [ICE 2025](https://ice-workshop.github.io/). Below are install and usage instructions.
+This repository contains the source code for the paper "A Formalization of the Reversible Concurrent Calculus CCSK<sup>P</sup> in Beluga", accepted at [ICE 2025](https://ice-workshop.github.io/). The artifact is also available in [Zenodo](https://doi.org/10.5281/zenodo.15660906). Below are install and usage instructions.
 
 The `code\` repository provides an overview of the files and a paper-to-artifact table. The `.github\workflows\` repository contains a workflow that can be built to automatically check the code. ![Build status](https://github.com/CinRC/Beluga_implementation/actions/workflows/build.yaml/badge.svg)
 
